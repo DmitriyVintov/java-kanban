@@ -9,13 +9,13 @@ public class SubTask extends Task {
 
     @Override
     public String toString() {
-        return '\n' + "SubTask{" +
+        return "SubTask{" +
                 "idEpicTask=" + idEpicTask +
                 ", id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
                 ", type='" + type + '\'' +
-                '}';
+                '}' + '\n';
     }
 }
