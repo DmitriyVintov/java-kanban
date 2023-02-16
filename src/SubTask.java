@@ -1,9 +1,18 @@
+import java.util.Objects;
+
 public class SubTask extends Task {
-    protected int idEpicTask;
+    private int idEpicTask;
 
     public SubTask(String name, String description, int idEpicTask) {
         super(name, description);
-        super.type = "subtask";
+        this.idEpicTask = idEpicTask;
+    }
+
+    public int getIdEpicTask() {
+        return idEpicTask;
+    }
+
+    public void setIdEpicTask(int idEpicTask) {
         this.idEpicTask = idEpicTask;
     }
 
@@ -15,7 +24,20 @@ public class SubTask extends Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
-                ", type='" + type + '\'' +
                 '}' + '\n';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SubTask subTask = (SubTask) o;
+        return idEpicTask == subTask.idEpicTask;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), idEpicTask);
     }
 }

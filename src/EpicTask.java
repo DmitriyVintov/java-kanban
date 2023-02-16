@@ -1,23 +1,44 @@
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class EpicTask extends Task {
-    public HashMap<Integer, SubTask> listSubTasks;
+    private final ArrayList<Integer> idSubTasks;
 
     public EpicTask(String name, String description) {
         super(name, description);
-        super.type = "epictask";
-        this.listSubTasks = new HashMap<>();
+        idSubTasks = new ArrayList<>();
+    }
+
+    public ArrayList<Integer> getIdSubTasks() {
+        return idSubTasks;
+    }
+
+    public void setIdSubTasks(Integer idSubTasks) {
+        this.idSubTasks.add(idSubTasks);
     }
 
     @Override
     public String toString() {
         return "EpicTask{" +
-                "id=" + id +
+                "idSubTasks=" + idSubTasks +
+                ", id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", status='" + status + '\'' +
-                ", type='" + type + '\'' +
-                ", " + "\n" + "listSubTasks=" + listSubTasks +
-                '}' + '\n';
+                ", status=" + status +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        EpicTask epicTask = (EpicTask) o;
+        return idSubTasks.equals(epicTask.idSubTasks);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), idSubTasks);
     }
 }
