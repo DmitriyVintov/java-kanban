@@ -1,7 +1,7 @@
 import java.util.Objects;
 
 public class SubTask extends Task {
-    private int idEpicTask;
+    private int idEpicTask; // Поле меняется сеттером. Нельзя final
 
     public SubTask(String name, String description, int idEpicTask) {
         super(name, description);

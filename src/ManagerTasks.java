@@ -1,9 +1,10 @@
 import java.util.HashMap;
+import java.util.Map;
 
 public class ManagerTasks {
-    public HashMap<Integer, Task> tasksRepo = new HashMap<>();
-    public HashMap<Integer, EpicTask> epicTasksRepo = new HashMap<>();
-    public HashMap<Integer, SubTask> subTasksRepo = new HashMap<>();
+    public final Map<Integer, Task> tasksRepo = new HashMap<>();
+    public final Map<Integer, EpicTask> epicTasksRepo = new HashMap<>();
+    public final Map<Integer, SubTask> subTasksRepo = new HashMap<>();
     private int countId = 0;
 
     public int createTask(Task task){ //Создание задачи
@@ -33,15 +34,15 @@ public class ManagerTasks {
         } else return -1;
     }
 
-    public HashMap<Integer, Task> getTasksRepo(){ //Получение списка всех Task задач
+    public Map<Integer, Task> getTasksRepo(){ //Получение списка всех Task задач
         return tasksRepo;
     }
 
-    public HashMap<Integer, EpicTask> getEpicTasksRepo(){ //Получение списка всех Epic задач
+    public Map<Integer, EpicTask> getEpicTasksRepo(){ //Получение списка всех Epic задач
         return epicTasksRepo;
     }
 
-    public HashMap<Integer, SubTask> getSubTasksRepo(){ //Получение списка всех SubTask задач
+    public Map<Integer, SubTask> getSubTasksRepo(){ //Получение списка всех SubTask задач
         return subTasksRepo;
     }
 

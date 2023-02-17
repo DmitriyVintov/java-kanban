@@ -1,4 +1,6 @@
-public class Test {
+public final class Test {
+    private Test() {}
+
     public static void test(){
         ManagerTasks managerTasks = new ManagerTasks();
         // Далее в комментариях id элементов, т.к. сквозная нумерация
