@@ -1,19 +1,18 @@
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * Данный класс содержит методы для выполнения следующих действий:
+ * Создание задач. Сам объект должен передаваться в качестве параметра;
+ * Получение списка всех задач;
+ * Получение по идентификатору;
+ * Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра;
+ * Удаление по идентификатору.
+ * Удаление всех задач;
+ */
 public class ManagerTasks {
-    /**
-     * Данный класс содержит методы для выполнения следующих действий:
-     * Создание задач. Сам объект должен передаваться в качестве параметра;
-     * Получение списка всех задач;
-     * Получение по идентификатору;
-     * Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра;
-     * Удаление по идентификатору.
-     * Удаление всех задач;
-     */
-    public final Map<Integer, Task> tasksRepo = new HashMap<>();
-    public final Map<Integer, EpicTask> epicTasksRepo = new HashMap<>();
-    public final Map<Integer, SubTask> subTasksRepo = new HashMap<>();
+    private final Map<Integer, Task> tasksRepo = new HashMap<>();
+    private final Map<Integer, EpicTask> epicTasksRepo = new HashMap<>();
+    private final Map<Integer, SubTask> subTasksRepo = new HashMap<>();
     private int countId = 0;
 
     /**
