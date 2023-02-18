@@ -7,8 +7,7 @@ public class EpicTask extends Task {
 
     public EpicTask(String name, String description) {
         super(name, description);
-        idSubTasks = new ArrayList<>() {
-        };
+        idSubTasks = new ArrayList<>();
     }
 
     public List<Integer> getIdSubTasks() {
