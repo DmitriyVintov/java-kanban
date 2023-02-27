@@ -1,5 +1,6 @@
 package views;
 
+import controllers.InMemoryHistoryManager;
 import controllers.InMemoryTaskManager;
 import controllers.Managers;
 import models.EpicTask;
@@ -94,13 +95,20 @@ public final class Test {
         // Создание менеджера задач по умолчанию
         InMemoryTaskManager taskManager = (InMemoryTaskManager) Managers.getDefaultTaskManager();
         // Создание задач
-        taskManager.createTask(new Task("Таск 1", "Описание Таск 1"));
-        taskManager.createTask(new Task("Таск 2", "Описание Таск 2"));
-        taskManager.createEpicTask(new EpicTask("Эпик 1", "Описание Эпик 1"));
-        taskManager.createEpicTask(new EpicTask("Эпик 1", "Описание Эпик 1"));
-        taskManager.createSubTask(new SubTask("Сабтаск 1", "Описание сабтаск 1", 2));
-        taskManager.createSubTask(new SubTask("Сабтаск 2", "Описание сабтаск 2", 2));
-        taskManager.createSubTask(new SubTask("Сабтаск 3", "Описание сабтаск 3", 2));
+        Task task1 = new Task("Таск 1", "Описание Таск 1");
+        taskManager.createTask(task1);
+        Task task2 = new Task("Таск 2", "Описание Таск 2");
+        taskManager.createTask(task2);
+        EpicTask epicTask1 = new EpicTask("Эпик 1", "Описание Эпик 1");
+        taskManager.createEpicTask(epicTask1);
+        EpicTask epicTask2 = new EpicTask("Эпик 2", "Описание Эпик 2");
+        taskManager.createEpicTask(epicTask2);
+        SubTask subTask1 = new SubTask("Сабтаск 1", "Описание сабтаск 1", 2);
+        taskManager.createSubTask(subTask1);
+        SubTask subTask2 = new SubTask("Сабтаск 2", "Описание сабтаск 2", 2);
+        taskManager.createSubTask(subTask2);
+        SubTask subTask3 = new SubTask("Сабтаск 3", "Описание сабтаск 3", 2);
+        taskManager.createSubTask(subTask3);
         // Получение задач по id - 12 раз
         taskManager.getTaskById(0);
         taskManager.getTaskById(3);
@@ -116,5 +124,21 @@ public final class Test {
         taskManager.getSubTaskById(4);
         // Проверка записи в историю просмотров задач не более 10 записей
         System.out.println("taskManager.getHistory() = " + taskManager.getHistory());
+        InMemoryHistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
+        // Добавление задач в список истории просмотров с помощью inMemoryHistoryManager - 12 задач
+        inMemoryHistoryManager.add(task1);
+        inMemoryHistoryManager.add(subTask1);
+        inMemoryHistoryManager.add(task2);
+        inMemoryHistoryManager.add(epicTask1);
+        inMemoryHistoryManager.add(subTask1);
+        inMemoryHistoryManager.add(epicTask2);
+        inMemoryHistoryManager.add(subTask3);
+        inMemoryHistoryManager.add(task2);
+        inMemoryHistoryManager.add(task1);
+        inMemoryHistoryManager.add(subTask1);
+        inMemoryHistoryManager.add(epicTask2);
+        inMemoryHistoryManager.add(subTask2);
+        // Проверка записи в историю просмотров задач не более 10 записей с помощью inMemoryHistoryManager
+        System.out.println("inMemoryHistoryManager.getHistory() = " + inMemoryHistoryManager.getHistory());
     }
 }
