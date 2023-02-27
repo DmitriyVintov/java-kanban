@@ -1,11 +1,11 @@
-package Views;
+package views;
 
-import Controllers.InMemoryTaskManager;
-import Controllers.Managers;
-import Models.EpicTask;
-import Models.Status;
-import Models.SubTask;
-import Models.Task;
+import controllers.InMemoryTaskManager;
+import controllers.Managers;
+import models.EpicTask;
+import models.Status;
+import models.SubTask;
+import models.Task;
 
 /**
  * Утилитарный класс для тестирования приложения

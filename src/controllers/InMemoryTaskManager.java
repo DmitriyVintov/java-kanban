@@ -1,9 +1,9 @@
-package Controllers;
+package controllers;
 
-import Models.EpicTask;
-import Models.Status;
-import Models.SubTask;
-import Models.Task;
+import models.EpicTask;
+import models.Status;
+import models.SubTask;
+import models.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,7 +68,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public Task getTaskById(int id) {
         if (!tasksRepo.isEmpty() && tasksRepo.containsKey(id)) {
-            addInHistory(tasksRepo.get(id));
+            add(tasksRepo.get(id));
             return tasksRepo.get(id);
         } else {
             return null;
@@ -78,7 +78,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public EpicTask getEpicTaskById(int id) {
         if (!epicTasksRepo.isEmpty() && epicTasksRepo.containsKey(id)) {
-            addInHistory(epicTasksRepo.get(id));
+            add(epicTasksRepo.get(id));
             return epicTasksRepo.get(id);
         } else {
             return null;
@@ -88,7 +88,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public SubTask getSubTaskById(int id) {
         if (!subTasksRepo.isEmpty() && subTasksRepo.containsKey(id)) {
-            addInHistory(subTasksRepo.get(id));
+            add(subTasksRepo.get(id));
             return subTasksRepo.get(id);
         } else {
             return null;
@@ -193,7 +193,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     }
 
     @Override
-    public void addInHistory(Task task) {
+    public void add(Task task) {
         if (history.size() >= 10) {
             history.remove(0);
         }

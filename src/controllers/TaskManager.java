@@ -1,9 +1,9 @@
-package Controllers;
+package controllers;
 
-import Models.EpicTask;
-import Models.Status;
-import Models.SubTask;
-import Models.Task;
+import models.EpicTask;
+import models.Status;
+import models.SubTask;
+import models.Task;
 
 import java.util.Map;
 

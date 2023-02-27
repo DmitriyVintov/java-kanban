@@ -1,4 +1,4 @@
-import Views.Test;
+import views.Test;
 
 public class Main {
 
