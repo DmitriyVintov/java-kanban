@@ -1,5 +1,7 @@
 package controllers;
 
+import models.Task;
+
 /**
  * Утилитарный класс для создания менеджеров задач и истории просмотров
  */
@@ -19,7 +21,7 @@ public class Managers {
      *
      * @return InMemoryHistoryManager
      */
-    public static HistoryManager getDefaultHistory() {
+    public static HistoryManager<Task> getDefaultHistory() {
         return new InMemoryHistoryManager();
     }
 }

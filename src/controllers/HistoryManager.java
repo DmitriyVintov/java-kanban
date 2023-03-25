@@ -7,16 +7,23 @@ import java.util.List;
 /**
  * Интерфейс описывает методы добавления и получения истории просмотров задач
  */
-public interface HistoryManager {
+public interface HistoryManager<T extends Task> {
     /**
      * Добавляет полученные задачи в историю просмотров
      *
-     * @param task Все виды задач
+     * @param t Все виды задач
      */
-    void add(Task task);
+    void add(T t);
 
     /**
      * Получение списка истории просмотров задач
      */
-    List<Task> getHistory();
+    List<T> getHistory();
+
+    /**
+     * Удаление задачи из истории просмотров
+     *
+     * @param id
+     */
+    void remove(int id);
 }

@@ -93,40 +93,41 @@ public final class Test {
      */
     public static void testGetHistory() {
         // Создание менеджера задач по умолчанию
-        InMemoryTaskManager taskManager = (InMemoryTaskManager) Managers.getDefaultTaskManager();
+        InMemoryTaskManager inMemoryTaskManager = (InMemoryTaskManager) Managers.getDefaultTaskManager();
+        InMemoryHistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
         // Создание задач
         Task task1 = new Task("Таск 1", "Описание Таск 1");
-        taskManager.createTask(task1);
+        inMemoryTaskManager.createTask(task1);
         Task task2 = new Task("Таск 2", "Описание Таск 2");
-        taskManager.createTask(task2);
+        inMemoryTaskManager.createTask(task2);
         EpicTask epicTask1 = new EpicTask("Эпик 1", "Описание Эпик 1");
-        taskManager.createEpicTask(epicTask1);
+        inMemoryTaskManager.createEpicTask(epicTask1);
         EpicTask epicTask2 = new EpicTask("Эпик 2", "Описание Эпик 2");
-        taskManager.createEpicTask(epicTask2);
+        inMemoryTaskManager.createEpicTask(epicTask2);
         SubTask subTask1 = new SubTask("Сабтаск 1", "Описание сабтаск 1", 2);
-        taskManager.createSubTask(subTask1);
+        inMemoryTaskManager.createSubTask(subTask1);
         SubTask subTask2 = new SubTask("Сабтаск 2", "Описание сабтаск 2", 2);
-        taskManager.createSubTask(subTask2);
+        inMemoryTaskManager.createSubTask(subTask2);
         SubTask subTask3 = new SubTask("Сабтаск 3", "Описание сабтаск 3", 2);
-        taskManager.createSubTask(subTask3);
-        // Получение задач по id - 12 раз
-        taskManager.getTaskById(0);
-        taskManager.getTaskById(3);
-        taskManager.getTaskById(1);
-        taskManager.getEpicTaskById(2);
-        taskManager.getTaskById(1);
-        taskManager.getSubTaskById(4);
-        taskManager.getEpicTaskById(3);
-        taskManager.getSubTaskById(5);
-        taskManager.getTaskById(1);
-        taskManager.getSubTaskById(4);
-        taskManager.getEpicTaskById(3);
-        taskManager.getSubTaskById(4);
-        // Проверка записи в историю просмотров задач не более 10 записей
-        System.out.println("taskManager.getHistory() = " + taskManager.getHistory());
-        InMemoryHistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
-        // Добавление задач в список истории просмотров с помощью inMemoryHistoryManager - 12 задач
+        inMemoryTaskManager.createSubTask(subTask3);
+        // Получение задач по id
+        inMemoryTaskManager.getTaskById(0);
+        inMemoryTaskManager.getTaskById(3);
+        inMemoryTaskManager.getTaskById(1);
+        inMemoryTaskManager.getEpicTaskById(2);
+        inMemoryTaskManager.getTaskById(1);
+        inMemoryTaskManager.getSubTaskById(4);
+        inMemoryTaskManager.getEpicTaskById(3);
+        inMemoryTaskManager.getSubTaskById(5);
+        inMemoryTaskManager.getTaskById(1);
+        inMemoryTaskManager.getSubTaskById(4);
+        inMemoryTaskManager.getEpicTaskById(3);
+        inMemoryTaskManager.getSubTaskById(4);
+        // Проверка записи в историю просмотров задач
+        System.out.println("taskManager.historyManager.getHistory() = " + inMemoryTaskManager.getHistory());
+        // Добавление задач в список истории просмотров с помощью inMemoryHistoryManager
         inMemoryHistoryManager.add(task1);
+        System.out.println("inMemoryHistoryManager.getHistory() = " + inMemoryHistoryManager.getHistory());
         inMemoryHistoryManager.add(subTask1);
         inMemoryHistoryManager.add(task2);
         inMemoryHistoryManager.add(epicTask1);
@@ -138,7 +139,13 @@ public final class Test {
         inMemoryHistoryManager.add(subTask1);
         inMemoryHistoryManager.add(epicTask2);
         inMemoryHistoryManager.add(subTask2);
-        // Проверка записи в историю просмотров задач не более 10 записей с помощью inMemoryHistoryManager
+        // Проверка записи в историю просмотров задач
+        System.out.println("inMemoryHistoryManager.getHistory() = " + inMemoryHistoryManager.getHistory());
+        System.out.println("inMemoryHistoryManager.getHistory() = " + inMemoryHistoryManager.getHistory());
+        // Удаление задач из истории просмотров
+        inMemoryHistoryManager.remove(2);
+        inMemoryHistoryManager.remove(5);
+        inMemoryHistoryManager.remove(20);
         System.out.println("inMemoryHistoryManager.getHistory() = " + inMemoryHistoryManager.getHistory());
     }
 }

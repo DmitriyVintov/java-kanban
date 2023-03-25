@@ -5,7 +5,6 @@ import models.Status;
 import models.SubTask;
 import models.Task;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,12 +12,16 @@ import java.util.Map;
 /**
  * Данный класс реализует интерфейсы менеджера задач и менеджера истории просмотров задач
  */
-public class InMemoryTaskManager implements TaskManager, HistoryManager {
+public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> tasksRepo = new HashMap<>();
     private final Map<Integer, EpicTask> epicTasksRepo = new HashMap<>();
     private final Map<Integer, SubTask> subTasksRepo = new HashMap<>();
-    private final List<Task> history = new ArrayList<>();
     private int countId = 0;
+    private final HistoryManager<Task> historyManager = Managers.getDefaultHistory();
+
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
+    }
 
     @Override
     public int createTask(Task task) {
@@ -68,7 +71,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public Task getTaskById(int id) {
         if (!tasksRepo.isEmpty() && tasksRepo.containsKey(id)) {
-            add(tasksRepo.get(id));
+            historyManager.add(tasksRepo.get(id));
             return tasksRepo.get(id);
         } else {
             return null;
@@ -78,7 +81,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public EpicTask getEpicTaskById(int id) {
         if (!epicTasksRepo.isEmpty() && epicTasksRepo.containsKey(id)) {
-            add(epicTasksRepo.get(id));
+            historyManager.add(epicTasksRepo.get(id));
             return epicTasksRepo.get(id);
         } else {
             return null;
@@ -88,7 +91,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public SubTask getSubTaskById(int id) {
         if (!subTasksRepo.isEmpty() && subTasksRepo.containsKey(id)) {
-            add(subTasksRepo.get(id));
+            historyManager.add(subTasksRepo.get(id));
             return subTasksRepo.get(id);
         } else {
             return null;
@@ -190,18 +193,5 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public void deleteAllSubTasks() {
         subTasksRepo.clear();
-    }
-
-    @Override
-    public void add(Task task) {
-        if (history.size() >= 10) {
-            history.remove(0);
-        }
-        history.add(task);
-    }
-
-    @Override
-    public List<Task> getHistory() {
-        return history;
     }
 }
