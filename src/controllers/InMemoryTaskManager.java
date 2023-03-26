@@ -41,16 +41,16 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public int createSubTask(SubTask subTask) {
-        if (!epicTasksRepo.isEmpty()
-                && epicTasksRepo.containsKey(subTask.getIdEpicTask())) {
-            subTask.setId(countId++);
-            subTask.setStatus(Status.NEW);
-            subTask.setIdEpicTask(epicTasksRepo.get(subTask.getIdEpicTask()).getId());
-            subTasksRepo.put(subTask.getId(), subTask);
-            epicTasksRepo.get(subTask.getIdEpicTask()).setIdSubTasks(subTask.getId());
-            updateEpicTask(epicTasksRepo.get(subTask.getIdEpicTask()));
-            return subTask.getId();
-        } else return -1;
+        if (!epicTasksRepo.containsKey(subTask.getIdEpicTask())) {
+            return -1;
+        }
+        subTask.setId(countId++);
+        subTask.setStatus(Status.NEW);
+        subTask.setIdEpicTask(epicTasksRepo.get(subTask.getIdEpicTask()).getId());
+        subTasksRepo.put(subTask.getId(), subTask);
+        epicTasksRepo.get(subTask.getIdEpicTask()).setIdSubTasks(subTask.getId());
+        updateEpicTask(epicTasksRepo.get(subTask.getIdEpicTask()));
+        return subTask.getId();
     }
 
     @Override
@@ -70,32 +70,29 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
-        if (!tasksRepo.isEmpty() && tasksRepo.containsKey(id)) {
-            historyManager.add(tasksRepo.get(id));
-            return tasksRepo.get(id);
-        } else {
+        if (!tasksRepo.containsKey(id)) {
             return null;
         }
+        historyManager.add(tasksRepo.get(id));
+        return tasksRepo.get(id);
     }
 
     @Override
     public EpicTask getEpicTaskById(int id) {
-        if (!epicTasksRepo.isEmpty() && epicTasksRepo.containsKey(id)) {
-            historyManager.add(epicTasksRepo.get(id));
-            return epicTasksRepo.get(id);
-        } else {
+        if (!epicTasksRepo.containsKey(id)) {
             return null;
         }
+        historyManager.add(epicTasksRepo.get(id));
+        return epicTasksRepo.get(id);
     }
 
     @Override
     public SubTask getSubTaskById(int id) {
-        if (!subTasksRepo.isEmpty() && subTasksRepo.containsKey(id)) {
-            historyManager.add(subTasksRepo.get(id));
-            return subTasksRepo.get(id);
-        } else {
+        if (!subTasksRepo.containsKey(id)) {
             return null;
         }
+        historyManager.add(subTasksRepo.get(id));
+        return subTasksRepo.get(id);
     }
 
     @Override
@@ -140,9 +137,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubTask(SubTask subTask, Status status) {
-        if (!subTasksRepo.isEmpty()
-                && !epicTasksRepo.isEmpty()
-                && epicTasksRepo.containsKey(subTask.getIdEpicTask())
+        if (epicTasksRepo.containsKey(subTask.getIdEpicTask())
                 && subTasksRepo.get(subTask.getId()).equals(subTask)) {
             subTask.setStatus(status);
             subTasksRepo.put(subTask.getId(), subTask);
@@ -152,15 +147,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTaskById(int id) {
-        if (!tasksRepo.isEmpty() && tasksRepo.containsKey(id) && tasksRepo.get(id).getId() == id) {
-            tasksRepo.remove(id);
-        }
+        tasksRepo.remove(id);
     }
 
     @Override
     public void deleteEpicTaskById(int id) {
-        if (!epicTasksRepo.isEmpty() && epicTasksRepo.containsKey(id) && epicTasksRepo.get(id).getId() == id
-                && !epicTasksRepo.get(id).getIdSubTasks().isEmpty()) {
+        if (epicTasksRepo.containsKey(id)) {
             for (Integer idSubTask : epicTasksRepo.get(id).getIdSubTasks()) {
                 subTasksRepo.remove(idSubTask);
             }
@@ -172,8 +164,8 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteSubTaskById(int id) {
         int idEpicTask = subTasksRepo.get(id).getIdEpicTask();
         int idSubTask = epicTasksRepo.get(idEpicTask).getIdSubTasks().indexOf(id);
-        if (id > 0 && !epicTasksRepo.isEmpty() && epicTasksRepo.containsKey(idEpicTask)
-                && !subTasksRepo.isEmpty() && subTasksRepo.containsKey(id) && subTasksRepo.get(id).getId() == id) {
+        if (id > 0 && epicTasksRepo.containsKey(idEpicTask)
+                && subTasksRepo.containsKey(id)) {
             epicTasksRepo.get(idEpicTask).getIdSubTasks().remove(idSubTask);
             subTasksRepo.remove(id);
         }
