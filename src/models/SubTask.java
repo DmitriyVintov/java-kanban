@@ -19,6 +19,11 @@ public class SubTask extends Task {
     }
 
     @Override
+    public Type getType() {
+        return Type.SUBTASK;
+    }
+
+    @Override
     public String toString() {
         return "models.SubTask{" + super.toString() +
                 ", idEpicTask=" + idEpicTask +

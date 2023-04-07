@@ -21,6 +21,11 @@ public class EpicTask extends Task {
     }
 
     @Override
+    public Type getType() {
+        return Type.EPIC;
+    }
+
+    @Override
     public String toString() {
         return "models.EpicTask{" + super.toString() +
                 ", idSubTasks=" + idSubTasks +

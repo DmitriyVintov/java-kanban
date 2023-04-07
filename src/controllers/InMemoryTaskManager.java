@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Данный класс реализует интерфейсы менеджера задач и менеджера истории просмотров задач
+ * Данный класс предназначен для хранения задач в оперативной памяти
+ * Реализует интерфейсы менеджера задач и менеджера истории просмотров задач
  */
 public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> tasksRepo = new HashMap<>();
@@ -19,8 +20,28 @@ public class InMemoryTaskManager implements TaskManager {
     private int countId = 0;
     private final HistoryManager<Task> historyManager = Managers.getDefaultHistory();
 
+    /**
+     * Метод получения менеджера истории
+     * @return
+     */
+    public HistoryManager<Task> getHistoryManager() {
+        return historyManager;
+    }
+
+    /**
+     * Получение списка истории просмотров задач
+     * @return
+     */
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    /**
+     * Получение счетчика задач данного менеджера
+     * @return
+     */
+    public int getCountId() {
+        return countId;
     }
 
     @Override

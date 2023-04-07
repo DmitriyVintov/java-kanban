@@ -1,12 +1,14 @@
-package views;
+package tests;
 
-import controllers.InMemoryHistoryManager;
+import controllers.FileBackedTaskManager;
 import controllers.InMemoryTaskManager;
 import controllers.Managers;
 import models.EpicTask;
 import models.Status;
 import models.SubTask;
 import models.Task;
+
+import java.io.IOException;
 
 /**
  * Утилитарный класс для тестирования приложения
@@ -18,7 +20,7 @@ public final class Test {
     /**
      * Статический метод тестирования CRUD методов всех типов задач
      */
-    public static void testCRUD() {
+    public static void testTasksCRUD() {
         InMemoryTaskManager inMemoryTaskManager = new InMemoryTaskManager();
         //Инициализация задач
         Task newT1 = new Task("Помыть полы", "До вечера помыть во всем доме");
@@ -89,63 +91,97 @@ public final class Test {
     }
 
     /**
-     * Статический метод тестирования получения списка истории просмотров задач
+     * Статический метод тестирования создания задач
      */
-    public static void testGetHistory() {
-        // Создание менеджера задач по умолчанию
-        InMemoryTaskManager inMemoryTaskManager = (InMemoryTaskManager) Managers.getDefaultTaskManager();
-        InMemoryHistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
+    public static void createTasks() {
+        FileBackedTaskManager defaultTaskManager = (FileBackedTaskManager) Managers.getDefaultTaskManager();
         // Создание задач
         Task task1 = new Task("Таск 1", "Описание Таск 1");
-        inMemoryTaskManager.createTask(task1);
+        defaultTaskManager.createTask(task1);
         Task task2 = new Task("Таск 2", "Описание Таск 2");
-        inMemoryTaskManager.createTask(task2);
+        defaultTaskManager.createTask(task2);
         EpicTask epicTask1 = new EpicTask("Эпик 1", "Описание Эпик 1");
-        inMemoryTaskManager.createEpicTask(epicTask1);
+        defaultTaskManager.createEpicTask(epicTask1);
         EpicTask epicTask2 = new EpicTask("Эпик 2", "Описание Эпик 2");
-        inMemoryTaskManager.createEpicTask(epicTask2);
+        defaultTaskManager.createEpicTask(epicTask2);
         SubTask subTask1 = new SubTask("Сабтаск 1", "Описание сабтаск 1", 2);
-        inMemoryTaskManager.createSubTask(subTask1);
+        defaultTaskManager.createSubTask(subTask1);
         SubTask subTask2 = new SubTask("Сабтаск 2", "Описание сабтаск 2", 2);
-        inMemoryTaskManager.createSubTask(subTask2);
+        defaultTaskManager.createSubTask(subTask2);
         SubTask subTask3 = new SubTask("Сабтаск 3", "Описание сабтаск 3", 2);
-        inMemoryTaskManager.createSubTask(subTask3);
+        defaultTaskManager.createSubTask(subTask3);
+    }
+
+    /**
+     * Статический метод тестирования создания истории просмотров задач
+     */
+    public static void testSaveHistoryInMemory() {
+        // Создание менеджера задач по умолчанию
+        FileBackedTaskManager defaultTaskManager = (FileBackedTaskManager) Managers.getDefaultTaskManager();
         // Получение задач по id
-        inMemoryTaskManager.getTaskById(0);
-        inMemoryTaskManager.getTaskById(3);
-        inMemoryTaskManager.getTaskById(1);
-        inMemoryTaskManager.getEpicTaskById(2);
-        inMemoryTaskManager.getTaskById(1);
-        inMemoryTaskManager.getSubTaskById(4);
-        inMemoryTaskManager.getEpicTaskById(3);
-        inMemoryTaskManager.getSubTaskById(5);
-        inMemoryTaskManager.getTaskById(1);
-        inMemoryTaskManager.getSubTaskById(4);
-        inMemoryTaskManager.getEpicTaskById(3);
-        inMemoryTaskManager.getSubTaskById(4);
-        // Проверка записи в историю просмотров задач
-        System.out.println("taskManager.historyManager.getHistory() = " + inMemoryTaskManager.getHistory());
-        // Добавление задач в список истории просмотров с помощью inMemoryHistoryManager
-        inMemoryHistoryManager.add(task1);
-        System.out.println("inMemoryHistoryManager.getHistory() = " + inMemoryHistoryManager.getHistory());
-        inMemoryHistoryManager.add(subTask1);
-        inMemoryHistoryManager.add(task2);
-        inMemoryHistoryManager.add(epicTask1);
-        inMemoryHistoryManager.add(subTask1);
-        inMemoryHistoryManager.add(epicTask2);
-        inMemoryHistoryManager.add(subTask3);
-        inMemoryHistoryManager.add(task2);
-        inMemoryHistoryManager.add(task1);
-        inMemoryHistoryManager.add(subTask1);
-        inMemoryHistoryManager.add(epicTask2);
-        inMemoryHistoryManager.add(subTask2);
-        // Проверка записи в историю просмотров задач
-        System.out.println("inMemoryHistoryManager.getHistory() = " + inMemoryHistoryManager.getHistory());
-        System.out.println("inMemoryHistoryManager.getHistory() = " + inMemoryHistoryManager.getHistory());
-        // Удаление задач из истории просмотров
-        inMemoryHistoryManager.remove(2);
-        inMemoryHistoryManager.remove(5);
-        inMemoryHistoryManager.remove(20);
-        System.out.println("inMemoryHistoryManager.getHistory() = " + inMemoryHistoryManager.getHistory());
+        defaultTaskManager.getTaskById(0);
+        defaultTaskManager.getTaskById(1);
+        defaultTaskManager.getEpicTaskById(2);
+        defaultTaskManager.getSubTaskById(4);
+        defaultTaskManager.getEpicTaskById(3);
+        defaultTaskManager.getSubTaskById(5);
+        defaultTaskManager.getSubTaskById(4);
+        defaultTaskManager.getEpicTaskById(3);
+        defaultTaskManager.getSubTaskById(6);
+    }
+
+    /**
+     * Статический метод тестирования сохранения списка задач и истории просмотров в файл
+     */
+    public static void testSaveOnFile() throws IOException {
+        String fileSave = "src/storage/save.csv";
+        // Создание менеджера задач по умолчанию
+        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(fileSave);
+        Task task1 = new Task("Таск 1", "Описание Таск 1");
+        fileBackedTaskManager.createTask(task1);
+        Task task2 = new Task("Таск 2", "Описание Таск 2");
+        fileBackedTaskManager.createTask(task2);
+        EpicTask epicTask1 = new EpicTask("Эпик 1", "Описание Эпик 1");
+        fileBackedTaskManager.createEpicTask(epicTask1);
+        EpicTask epicTask2 = new EpicTask("Эпик 2", "Описание Эпик 2");
+        fileBackedTaskManager.createEpicTask(epicTask2);
+        SubTask subTask1 = new SubTask("Сабтаск 1", "Описание сабтаск 1", 2);
+        fileBackedTaskManager.createSubTask(subTask1);
+        SubTask subTask2 = new SubTask("Сабтаск 2", "Описание сабтаск 2", 2);
+        fileBackedTaskManager.createSubTask(subTask2);
+        SubTask subTask3 = new SubTask("Сабтаск 3", "Описание сабтаск 3", 2);
+        fileBackedTaskManager.createSubTask(subTask3);
+
+        // Получение задач по id
+        fileBackedTaskManager.getTaskById(0);
+        fileBackedTaskManager.getTaskById(1);
+        fileBackedTaskManager.getEpicTaskById(2);
+        fileBackedTaskManager.getSubTaskById(4);
+        fileBackedTaskManager.getEpicTaskById(3);
+        fileBackedTaskManager.getSubTaskById(5);
+        fileBackedTaskManager.getSubTaskById(4);
+        fileBackedTaskManager.getEpicTaskById(3);
+        fileBackedTaskManager.getSubTaskById(6);
+
+        System.out.println("История");
+        System.out.println(fileBackedTaskManager.getHistory());
+        FileBackedTaskManager.historyToString(fileBackedTaskManager.getHistoryManager(), fileSave);
+    }
+
+    /**
+     * Статический метод тестирования загрузки списка задач и истории просмотров из файла
+     */
+    public static void testLoadFromFile() {
+        String fileSave = "src/storage/save.csv";
+        // Создание менеджера задач по умолчанию
+        FileBackedTaskManager fileBackedTaskManager = FileBackedTaskManager.loadFromFile(fileSave);
+        // Загрузка из файла в программу
+        System.out.println("Задачи");
+        System.out.println(fileBackedTaskManager.getTasksRepo());
+        System.out.println(fileBackedTaskManager.getEpicTasksRepo());
+        System.out.println(fileBackedTaskManager.getSubTasksRepo());
+        System.out.println("История");
+        System.out.println(fileBackedTaskManager.getHistory());
+        System.out.println("fileBackedTaskManager.getCountId() = " + fileBackedTaskManager.getCountId());
     }
 }
