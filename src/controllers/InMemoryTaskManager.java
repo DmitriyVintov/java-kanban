@@ -17,7 +17,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> tasksRepo = new HashMap<>();
     private final Map<Integer, EpicTask> epicTasksRepo = new HashMap<>();
     private final Map<Integer, SubTask> subTasksRepo = new HashMap<>();
-    private int countId = 0;
+    protected int countId = 0;
     private final HistoryManager<Task> historyManager = Managers.getDefaultHistory();
 
     /**
@@ -34,14 +34,6 @@ public class InMemoryTaskManager implements TaskManager {
      */
     public List<Task> getHistory() {
         return historyManager.getHistory();
-    }
-
-    /**
-     * Получение счетчика задач данного менеджера
-     * @return
-     */
-    public int getCountId() {
-        return countId;
     }
 
     @Override
