@@ -1,10 +1,10 @@
-package controllers;
+package controller;
 
-import exceptions.ManagerSaveException;
-import models.EpicTask;
-import models.Status;
-import models.SubTask;
-import models.Task;
+import exception.ManagerException;
+import model.EpicTask;
+import model.Status;
+import model.SubTask;
+import model.Task;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Данный класс предназначен для записи задач из оперативной памяти в файл и восстановления задач в памяти из файла
@@ -20,7 +21,6 @@ import java.util.Objects;
  */
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final String path;
-
 
     public FileBackedTaskManager(String path) {
         this.path = path;
@@ -34,25 +34,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     /**
      * Сохраняет текущее состояние менеджера в указанный файл
      */
-    public void save() {
+    private void save() {
         try (FileWriter fw = new FileWriter(path, StandardCharsets.UTF_8)) {
-            StringBuilder result = new StringBuilder("id,type,name,status,description,epic" + "\n");
+            StringBuilder result = new StringBuilder("id,type,name,status,description,startTime,duration,epic" + "\n");
             for (Task task : getTasksRepo().values()) {
-                result.append(String.format("%s,%s,%s,%s,%s,", task.getId(), task.getType(), task.getName(),
-                        task.getStatus(), task.getDescription())).append("\n");
+                result.append(String.format("%s,%s,%s,%s,%s,%s,%s,", task.getId(), task.getType(), task.getName(),
+                        task.getStatus(), task.getDescription(), task.getStartTimeToString(), task.getDuration())).append("\n");
             }
             for (EpicTask epicTask : getEpicTasksRepo().values()) {
-                result.append(String.format("%s,%s,%s,%s,%s,", epicTask.getId(), epicTask.getType(), epicTask.getName(), epicTask.getStatus(),
-                        epicTask.getDescription())).append("\n");
+                result.append(String.format("%s,%s,%s,%s,%s,%s,%s,", epicTask.getId(), epicTask.getType(), epicTask.getName(), epicTask.getStatus(),
+                        epicTask.getDescription(), epicTask.getStartTimeToString(), epicTask.getDuration())).append("\n");
             }
             for (SubTask subTask : getSubTasksRepo().values()) {
-                result.append(String.format("%s,%s,%s,%s,%s,%s", subTask.getId(), subTask.getType(), subTask.getName(), subTask.getStatus(),
-                        subTask.getDescription(),
+                result.append(String.format("%s,%s,%s,%s,%s,%s,%s,%s", subTask.getId(), subTask.getType(), subTask.getName(), subTask.getStatus(),
+                        subTask.getDescription(), subTask.getStartTimeToString(), subTask.getDuration(),
                         subTask.getIdEpicTask())).append("\n");
             }
             fw.write(result.append("\n").toString());
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка сохранения файла");
+            System.out.println(e.getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка считывания из файла");
+            throw new ManagerException("Ошибка загрузки из файла");
         }
         return fileBackedTaskManager;
     }
@@ -104,10 +104,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      */
     private Task getTaskFromString(String string) {
         String[] elem = string.split(",");
-        Task task = new Task(elem[2], elem[4]);
+        Task task = new Task(elem[2], elem[4], elem[5], Long.parseLong(elem[6]));
         task.setId(Integer.parseInt(elem[0]));
         task.setStatus(Status.valueOf(elem[3]));
-        setCountId(task.getId());
+        setCountId(task.getId() + 1);
         getTasksRepo().put(task.getId(), task);
         return task;
     }
@@ -120,10 +120,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      */
     private EpicTask getEpicTaskFromString(String string) {
         String[] elem = string.split(",");
-        EpicTask epicTask = new EpicTask(elem[2], elem[4]);
+        EpicTask epicTask = new EpicTask(elem[2], elem[4], elem[5], Long.parseLong(elem[6]));
         epicTask.setId(Integer.parseInt(elem[0]));
         epicTask.setStatus(Status.valueOf(elem[3]));
-        setCountId(epicTask.getId());
+        setCountId(epicTask.getId() + 1);
         getEpicTasksRepo().put(epicTask.getId(), epicTask);
         return epicTask;
     }
@@ -136,12 +136,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      */
     private SubTask getSubTaskFromString(String string) {
         String[] elem = string.split(",");
-        SubTask subTask = new SubTask(elem[2], elem[4], Integer.parseInt(elem[5]));
+        SubTask subTask = new SubTask(elem[2], elem[4], elem[5], Long.parseLong(elem[6]), Integer.parseInt(elem[7]));
         subTask.setId(Integer.parseInt(elem[0]));
         EpicTask epic = getEpicTasksRepo().get(subTask.getIdEpicTask());
         epic.setIdSubTasks(Integer.valueOf(elem[0]));
-        getEpicTasksRepo().get(subTask.getIdEpicTask()).setIdSubTasks(subTask.getId());
-        setCountId(subTask.getId());
+        setCountId(subTask.getId() + 1);
         getSubTasksRepo().put(subTask.getId(), subTask);
         return subTask;
     }
@@ -153,16 +152,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      * @param path           Путь к файлу сохранения
      */
     public static void historyToString(HistoryManager<Task> historyManager, String path) {
-        final ManagerSaveException managerSaveException = new ManagerSaveException("Ошибка сохранения файла");
         StringBuilder result = new StringBuilder();
         try (FileWriter fw = new FileWriter(path, StandardCharsets.UTF_8, true)) {
+            if (historyManager.getHistory().isEmpty())
+                throw new ManagerException("История просмотров пустая");
             for (Task task : historyManager.getHistory()) {
                 result.append(task.getId()).append(",");
             }
             result.deleteCharAt(result.lastIndexOf(","));
             fw.write(result.toString());
         } catch (IOException e) {
-            System.out.println(managerSaveException.getMessage());
+            throw new ManagerException("Ошибка записи в файл");
         }
     }
 
@@ -174,6 +174,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      */
     private static void historyFromString(FileBackedTaskManager fileBackedTaskManager, String value) {
         HistoryManager<Task> historyManager = fileBackedTaskManager.getHistoryManager();
+        Optional<String> valueString = Optional.ofNullable(value);
+        if (valueString.isEmpty()) {
+            return;
+        }
         String[] result = value.split(",");
         for (String s : result) {
             for (Task task : fileBackedTaskManager.getTasksRepo().values()) {

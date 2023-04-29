@@ -1,4 +1,4 @@
-package models;
+package model;
 
 /**
  * Класс, в котором перечислены типы задач

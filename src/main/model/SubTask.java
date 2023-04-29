@@ -1,21 +1,17 @@
-package models;
+package model;
 
 import java.util.Objects;
 
 public class SubTask extends Task {
-    private int idEpicTask;
+    private final int idEpicTask;
 
-    public SubTask(String name, String description, int idEpicTask) {
-        super(name, description);
+    public SubTask(String name, String description, String startTime, long duration, int idEpicTask) {
+        super(name, description, startTime, duration);
         this.idEpicTask = idEpicTask;
     }
 
     public int getIdEpicTask() {
         return idEpicTask;
-    }
-
-    public void setIdEpicTask(int idEpicTask) {
-        this.idEpicTask = idEpicTask;
     }
 
     @Override
@@ -25,7 +21,7 @@ public class SubTask extends Task {
 
     @Override
     public String toString() {
-        return "models.SubTask{" + super.toString() +
+        return super.toString() +
                 ", idEpicTask=" + idEpicTask +
                 '}' + '\n';
     }

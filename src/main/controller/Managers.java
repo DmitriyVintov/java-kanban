@@ -1,11 +1,17 @@
-package controllers;
+package controller;
 
-import models.Task;
+import model.Task;
 
 /**
  * Утилитарный класс для создания менеджеров задач и истории просмотров
  */
 public class Managers {
+    public static String getPath() {
+        return path;
+    }
+
+    private static final String path = "src/main/storage/save.csv";
+
     private Managers() {
     }
 
@@ -16,6 +22,10 @@ public class Managers {
      */
     public static TaskManager getDefaultTaskManager() {
         return new InMemoryTaskManager();
+    }
+
+    public static TaskManager getFileBackedTaskManager() {
+        return new FileBackedTaskManager(path);
     }
 
     /**

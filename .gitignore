@@ -25,3 +25,4 @@ hs_err_pid*
 # Project Files #
 *.iml
 /.idea
+/dontAdd

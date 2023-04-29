@@ -1,6 +1,6 @@
-package controllers;
+package controller;
 
-import models.Task;
+import model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,12 +25,13 @@ public class InMemoryHistoryManager implements HistoryManager<Task> {
 
     @Override
     public void add(Task task) {
-        if (task != null) {
-            if (nodes.containsKey(task.getId())) {
-                remove(task.getId());
-            }
-            nodes.put(task.getId(), linkLast(task));
+        if (task == null) {
+            return;
         }
+        if (nodes.containsKey(task.getId())) {
+            remove(task.getId());
+        }
+        nodes.put(task.getId(), linkLast(task));
     }
 
     @Override
@@ -46,8 +47,14 @@ public class InMemoryHistoryManager implements HistoryManager<Task> {
 
     @Override
     public void remove(int id) {
+        if (!nodes.containsKey(id)) {
+            return;
+        }
         Node<Task> target = nodes.get(id);
-        if (target == null) {
+        if (target == first && target == last) {
+            nodes.remove(id);
+            first = null;
+            last = null;
             return;
         }
         if (target == first) {
@@ -70,13 +77,14 @@ public class InMemoryHistoryManager implements HistoryManager<Task> {
     /**
      * Метод создания связанного списка истории просмотров
      *
-     * @param task
+     * @param task Задача
      * @return Элемент истории просмотров, присоединенный к связанному списку
      */
     private Node<Task> linkLast(Task task) {
         final Node<Task> newNode = new Node<>(last, task, null);
         if (first == null & last == null) {
             first = newNode;
+            last = first;
         } else if (last == null) {
             first.next = newNode;
             newNode.prev = first;

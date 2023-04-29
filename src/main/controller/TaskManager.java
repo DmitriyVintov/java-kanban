@@ -1,11 +1,14 @@
-package controllers;
+package controller;
 
-import models.EpicTask;
-import models.Status;
-import models.SubTask;
-import models.Task;
+import model.EpicTask;
+import model.Status;
+import model.SubTask;
+import model.Task;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Интерфейс описывает методы CRUD задач, Эпик задач и подзадач, а также метод добавления в историю просмотров
@@ -19,6 +22,7 @@ import java.util.Map;
  * Получение списка истории просмотров задач
  */
 public interface TaskManager {
+
     /**
      * Создание задачи и добавление ее в список tasksRepo
      *
@@ -137,4 +141,16 @@ public interface TaskManager {
      * Удаление всех подзадач
      */
     void deleteAllSubTasks();
+
+    List<Task> getHistory();
+
+    LocalDateTime getMinStartTimeSubTask(EpicTask epicTask);
+
+    LocalDateTime getMaxEndTimeSubTask(EpicTask epicTask);
+
+    HistoryManager<Task> getHistoryManager();
+
+    void checkTaskInBusyTimeMap(Task task);
+
+    Set<Task> getPrioritizedTasks();
 }
