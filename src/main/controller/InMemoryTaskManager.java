@@ -5,9 +5,7 @@ import model.EpicTask;
 import model.Status;
 import model.SubTask;
 import model.Task;
-import org.junit.jupiter.api.BeforeAll;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -21,9 +19,10 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, SubTask> subTasksRepo = new HashMap<>();
     protected int countId = 0;
     private final HistoryManager<Task> historyManager = Managers.getDefaultHistory();
-    private final Set<Task> sortedMap = new TreeSet<>(Comparator.comparing(Task::getStartTime,
+    private final Set<Task> sortedSet = new TreeSet<>(Comparator.comparing(Task::getStartTime,
             Comparator.nullsLast(Comparator.naturalOrder())));
-    public static final Map<LocalDateTime, Boolean> busyTime = new HashMap<>(35040);
+    public static final int NUM_OF_15_MIN_INTERVALS = 365 * 24 * 60 / 15;
+    public static final Map<LocalDateTime, Boolean> busyTime = new HashMap<>(NUM_OF_15_MIN_INTERVALS);
 
     /**
      * Метод получения менеджера истории
@@ -41,13 +40,6 @@ public class InMemoryTaskManager implements TaskManager {
      */
     public List<Task> getHistory() {
         return historyManager.getHistory();
-    }
-
-    public static void loadMapBusyTime() {
-        for (long i = 0; i < 35040; i++) {
-            LocalDateTime start = LocalDateTime.of(2023, 1, 1, 0, 0);
-            InMemoryTaskManager.busyTime.put(start.plusMinutes(i * 15), false);
-        }
     }
 
     @Override
@@ -68,8 +60,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Set<Task> getPrioritizedTasks() {
-        return sortedMap;
+    public List<Task> getPrioritizedTasks() {
+        return new ArrayList<>(sortedSet);
     }
 
     @Override
@@ -80,7 +72,7 @@ public class InMemoryTaskManager implements TaskManager {
         task.setId(countId++);
         task.setStatus(Status.NEW);
         tasksRepo.put(task.getId(), task);
-        sortedMap.add(task);
+        sortedSet.add(task);
         return task.getId();
     }
 
@@ -88,11 +80,9 @@ public class InMemoryTaskManager implements TaskManager {
     public int createEpicTask(EpicTask epicTask) {
         if (epicTask.getName().isBlank() || epicTask.getDescription().isBlank())
             throw new ManagerException("Введены неверные имя или описание задачи");
-        checkTaskInBusyTimeMap(epicTask);
         epicTask.setId(countId++);
         epicTask.setStatus(Status.NEW);
         epicTasksRepo.put(epicTask.getId(), epicTask);
-        sortedMap.add(epicTask);
         return epicTask.getId();
     }
 
@@ -134,7 +124,7 @@ public class InMemoryTaskManager implements TaskManager {
         subTasksRepo.put(subTask.getId(), subTask);
         EpicTask epicTask = epicTasksRepo.get(subTask.getIdEpicTask());
         epicTask.setIdSubTasks(subTask.getId());
-        sortedMap.add(subTask);
+        sortedSet.add(subTask);
         updateEpicTask(epicTask);
         return subTask.getId();
     }
@@ -198,8 +188,13 @@ public class InMemoryTaskManager implements TaskManager {
             throw new ManagerException("Данной задачи не существует");
         epicTask.setStartTime(getMinStartTimeSubTask(epicTask));
         epicTask.setEndTime(getMaxEndTimeSubTask(epicTask));
-        Duration duration = Duration.between(epicTask.getStartTime(), epicTask.getEndTime());
-        epicTask.setDuration(duration.toMinutes());
+        long duratinonLong = 0;
+        if (!epicTask.getIdSubTasks().isEmpty()) {
+            for (Integer idSubTask : epicTask.getIdSubTasks()) {
+                duratinonLong += subTasksRepo.get(idSubTask).getDuration();
+            }
+        }
+        epicTask.setDuration(duratinonLong);
         int countNEW = 0;
         int countDONE = 0;
         for (Integer idSubTask : epicTask.getIdSubTasks()) {
@@ -249,6 +244,8 @@ public class InMemoryTaskManager implements TaskManager {
         if (getHistory().contains(tasksRepo.get(id))) {
             historyManager.remove(id);
         }
+        sortedSet.remove(getTaskById(id));
+        busyTime.put(getTimeToSearch(getTaskById(id)), false);
         tasksRepo.remove(id);
     }
 
@@ -277,6 +274,8 @@ public class InMemoryTaskManager implements TaskManager {
             if (getHistory().contains(subTasksRepo.get(id))) {
                 historyManager.remove(id);
             }
+            sortedSet.remove(getSubTaskById(id));
+            busyTime.put(getTimeToSearch(getSubTaskById(id)), false);
             subTasksRepo.remove(id);
         }
         updateEpicTask(epicTasksRepo.get(idEpicTask));
@@ -288,6 +287,8 @@ public class InMemoryTaskManager implements TaskManager {
             if (getHistory().contains(tasksRepo.get(id))) {
                 historyManager.remove(id);
             }
+            sortedSet.remove(getTaskById(id));
+            busyTime.put(getTimeToSearch(getTaskById(id)), false);
             deleteTaskById(id);
         }
     }
@@ -308,6 +309,8 @@ public class InMemoryTaskManager implements TaskManager {
             if (getHistory().contains(subTasksRepo.get(id))) {
                 historyManager.remove(id);
             }
+            sortedSet.remove(getSubTaskById(id));
+            busyTime.put(getTimeToSearch(getSubTaskById(id)), false);
             deleteSubTaskById(id);
         }
     }

@@ -8,7 +8,6 @@ import model.Task;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Интерфейс описывает методы CRUD задач, Эпик задач и подзадач, а также метод добавления в историю просмотров
@@ -152,5 +151,5 @@ public interface TaskManager {
 
     void checkTaskInBusyTimeMap(Task task);
 
-    Set<Task> getPrioritizedTasks();
+    List<Task> getPrioritizedTasks();
 }

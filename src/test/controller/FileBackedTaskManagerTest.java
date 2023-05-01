@@ -16,7 +16,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     @BeforeEach
     void createTasks() {
         taskManager = (FileBackedTaskManager) Managers.getFileBackedTaskManager();
-        FileBackedTaskManager.loadMapBusyTime();
+        controller.Test.loadMapBusyTime();
         task = new Task("task1", "descrTask1", "29.04.2023 12:00", 10);
         epicTask = new EpicTask("epic1", "descrEpic1", "", 0);
         subTask = new SubTask("subtask1", "descrSub1", "29.04.2023 15:00", 30, epicTask.getId());
@@ -27,7 +27,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     void saveToFileAndLoadFromFile() {
         int task1 = taskManager.createTask(task);
         int epicTask1 = taskManager.createEpicTask(epicTask);
-        int subTask1 = taskManager.createSubTask(new SubTask("subtask", "descr subtask","30.04.2023 15:00", 1, epicTask1));
+        int subTask1 = taskManager.createSubTask(new SubTask("subtask", "descr subtask", "30.04.2023 15:00", 1, epicTask1));
         taskManager.getTaskById(task1);
         taskManager.getEpicTaskById(epicTask1);
         taskManager.getSubTaskById(subTask1);

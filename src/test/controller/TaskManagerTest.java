@@ -5,6 +5,7 @@ import model.EpicTask;
 import model.Status;
 import model.SubTask;
 import model.Task;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -19,28 +20,28 @@ abstract class TaskManagerTest<T extends TaskManager> {
     protected HistoryManager<Task> historyManager;
 
     @Test
-    void getHistoryManager() {
+    void shouldGetHistoryManager() {
         taskManager.createTask(task);
         taskManager.getTaskById(0);
         assertNotNull(historyManager);
     }
 
     @Test
-    void getHistory() {
+    void shouldGetHistory() {
         taskManager.createTask(task);
         taskManager.getTaskById(task.getId());
         List<Task> history = taskManager.getHistory();
-        assertEquals(1, history.size(), "История не пустая");
+        assertEquals(1, history.size());
     }
 
     @Test
-    void getHistoryWhenListIsEmpty() {
+    void shouldGetHistoryWhenListIsEmpty() {
         List<Task> history = taskManager.getHistory();
-        assertEquals(0, history.size(), "История пустая");
+        assertEquals(0, history.size());
     }
 
     @Test
-    void createTask() {
+    void shouldCreateTaskWhenReceivedValidTask() {
         taskManager.createTask(task);
         assertEquals(0, task.getId());
         boolean b = taskManager.getTasksRepo().containsKey(task.getId());
@@ -49,14 +50,14 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void createTaskWhenArgumentsIsEmpty() {
+    void shouldGetExceptionWhenGetTaskWithEmptyArguments() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.createTask(new Task("", "", "", 0)));
         assertEquals("Введены неверные имя или описание задачи", e.getMessage());
     }
 
     @Test
-    void createTaskWhenTimeIsBusy() {
+    void shouldGetExceptionWhenCreateTaskWithBusyTime() {
         taskManager.createTask(new Task("task1", "descr1", "29.04.2023 15:00", 2));
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.createTask(new Task("task2", "descr2", "29.04.2023 15:00", 2)));
@@ -64,7 +65,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void createEpicTask() {
+    void shouldCreateEpicTaskWhenReceivedValidEpicTask() {
         taskManager.createEpicTask(epicTask);
         assertEquals(0, epicTask.getId());
         boolean b = taskManager.getEpicTasksRepo().containsKey(epicTask.getId());
@@ -73,14 +74,14 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void createEpicTaskWhenArgumentsIsEmpty() {
+    void shouldGetExceptionWhenGetEpicTaskWithEmptyArguments() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.createEpicTask(new EpicTask("", "", "30.04.2023 12:00", 1)));
         assertEquals("Введены неверные имя или описание задачи", e.getMessage());
     }
 
     @Test
-    void createSubTask() {
+    void shouldCreateSubTaskTWhenReceivedValidSubTask() {
         taskManager.createEpicTask(epicTask);
         taskManager.createSubTask(subTask);
         assertEquals(1, subTask.getId());
@@ -92,14 +93,14 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void createSubTaskWhenArgumentsIsEmpty() {
+    void shouldGetExceptionWhenGetSubTaskWithEmptyArguments() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.createSubTask(new SubTask("", "", "30.04.2023 12:00", 1, 1)));
         assertEquals("Введены неверные имя или описание задачи", e.getMessage());
     }
 
     @Test
-    void createSubTaskWhenWrongIdEpicTask() {
+    void shouldGetExceptionWhenGetWrongIdEpicTask() {
         taskManager.createEpicTask(epicTask);
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.createSubTask(new SubTask("subtask", "descr", "30.04.2023 12:00", 5, -1)));
@@ -107,35 +108,35 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getReposWhenTheyEmpty() {
+    void shouldGetEmptyMapsWhenNoTasksHaveBeenCreated() {
         assertEquals(0, taskManager.getTasksRepo().size());
         assertEquals(0, taskManager.getEpicTasksRepo().size());
         assertEquals(0, taskManager.getSubTasksRepo().size());
     }
 
     @Test
-    void getTaskByIdWhenWrongId() {
+    void shouldGetExceptionWhenGetWrongIdTaskForGetById() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.getTaskById(-1));
         assertEquals("Данной задачи не существует", e.getMessage());
     }
 
     @Test
-    void getEpicTaskByIdWhenWrongId() {
+    void shouldGetExceptionWhenGetWrongIdEpicTaskForGetById() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.getEpicTaskById(-1));
         assertEquals("Данной задачи не существует", e.getMessage());
     }
 
     @Test
-    void getSubTaskByIdWhenWrongId() {
+    void shouldGetExceptionWhenGetWrongIdSubTaskForGetById() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.getSubTaskById(-1));
         assertEquals("Данной задачи не существует", e.getMessage());
     }
 
     @Test
-    void updateTask() {
+    void shouldUpdateTaskWhenReceivedValidTask() {
         int task1 = taskManager.createTask(task);
         Task taskById = taskManager.getTaskById(task1);
         taskManager.updateTask(taskById, Status.IN_PROGRESS);
@@ -143,21 +144,21 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateTaskWhenArgumentsIsEmpty() {
+    void shouldGetExceptionWhenUpdateTaskWithEmptyArguments() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.updateTask(new Task("", "", "30.04.2023 12:00", 5), Status.IN_PROGRESS));
         assertEquals("Введены неверные имя или описание задачи", e.getMessage());
     }
 
     @Test
-    void updateTaskWhenStatusIsNull() {
+    void shouldGetExceptionWhenUpdateTaskWithStatusIsNull() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.updateTask(new Task("task", "descr", "30.04.2023 12:00", 1), null));
         assertEquals("Введите правильный статус задачи", e.getMessage());
     }
 
     @Test
-    void updateTaskWhenRepoDoesNotContainTask() {
+    void shouldGetExceptionWhenUpdateTaskButMapDoesNotContainTask() {
         int task1 = taskManager.createTask(new Task("task1", "descr1", "30.04.2023 12:00", 1));
         taskManager.createTask(new Task("task2", "descr2", "30.04.2023 13:00", 1));
         taskManager.deleteTaskById(task1);
@@ -167,7 +168,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateEpicTask() {
+    void shouldUpdateEpicTaskWhenReceivedValidEpicTask() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
         int subTask1 = taskManager.createSubTask(new SubTask("subtask", "descr subtask", "30.04.2023 12:00", 1, epicTask1));
         EpicTask epicTaskById = taskManager.getEpicTaskById(epicTask1);
@@ -180,14 +181,14 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateEpicTaskWhenArgumentsIsEmpty() {
+    void shouldGetExceptionWhenUpdateEpicTaskWithEmptyArguments() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.updateEpicTask(new EpicTask("", "", "30.04.2023 12:00", 1)));
         assertEquals("Введены неверные имя или описание задачи", e.getMessage());
     }
 
     @Test
-    void updateEpicTaskWhenRepoDoesNotContainTask() {
+    void shouldGetExceptionWhenUpdateEpicTaskButMapDoesNotContainTask() {
         int epicTask1 = taskManager.createEpicTask(new EpicTask("epicTask1", "descr1", "30.04.2023 12:00", 1));
         taskManager.createEpicTask(new EpicTask("epicTask2", "descr2", "30.04.2023 13:00", 1));
         taskManager.deleteEpicTaskById(epicTask1);
@@ -197,7 +198,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldBeEpicTaskStatusIsNew() {
+    void shouldBeEpicTaskStatusNewWhenAllSubTasksIsNew() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
         taskManager.createSubTask(new SubTask("subtask1", "descr subtask1", "30.04.2023 12:00", 1, epicTask1));
         taskManager.createSubTask(new SubTask("subtask2", "descr subtask2", "30.04.2023 13:00", 1, epicTask1));
@@ -206,7 +207,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldBeEpicTaskStatusIsInProgress() {
+    void shouldBeEpicTaskStatusInProgressWhenAtLeastOneSubTasksIsInProgress() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
         int subTask1 = taskManager.createSubTask(new SubTask("subtask1", "descr subtask1", "30.04.2023 12:00", 1, epicTask1));
         taskManager.createSubTask(new SubTask("subtask2", "descr subtask2", "30.04.2023 13:00", 1, epicTask1));
@@ -219,7 +220,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldBeEpicTaskStatusIsDone() {
+    void shouldBeEpicTaskStatusDoneWhenAllSubTasksIsDone() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
         int subTask1 = taskManager.createSubTask(new SubTask("subtask1", "descr subtask1", "30.04.2023 12:00", 1, epicTask1));
         int subTask2 = taskManager.createSubTask(new SubTask("subtask2", "descr subtask2", "30.04.2023 13:00", 1, epicTask1));
@@ -232,7 +233,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateSubTask() {
+    void shouldUpdateSubTaskWhenReceivedValidSubTask() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
         int subTask1 = taskManager.createSubTask(new SubTask("subtask", "descr subtask", "30.04.2023 12:00", 1, epicTask1));
         SubTask subTaskById = taskManager.getSubTaskById(subTask1);
@@ -241,7 +242,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateSubTaskWhenArgumentsIsEmpty() {
+    void shouldGetExceptionWhenUpdateSubTaskWithEmptyArguments() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.updateSubTask(new SubTask("", "", "30.04.2023 12:00", 1, epicTask1), Status.IN_PROGRESS));
@@ -249,7 +250,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateSubTaskWhenStatusIsNull() {
+    void shouldGetExceptionWhenUpdateEpicTaskWithStatusIsNull() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.updateSubTask(new SubTask("task", "descr", "30.04.2023 12:00", 1, epicTask1), null));
@@ -257,7 +258,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateSubTaskWhenRepoDoesNotContainTask() {
+    void shouldGetExceptionWhenUpdateSubTaskButMapDoesNotContainTask() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
         int subTask1 = taskManager.createSubTask(new SubTask("subTask1", "descr1", "30.04.2023 12:00", 1, epicTask1));
         taskManager.createSubTask(new SubTask("subTask2", "descr2", "30.04.2023 13:00", 1, epicTask1));
@@ -268,7 +269,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteTaskById() {
+    void shouldDeleteTaskByIdWhenReceivedValidId() {
         taskManager.createTask(task);
         assertEquals(1, taskManager.getTasksRepo().size());
         taskManager.deleteTaskById(0);
@@ -276,14 +277,14 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteTaskByIdWhenWrongId() {
+    void shouldGetExceptionWhenDeleteTaskByIdWithWrongId() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.deleteTaskById(-1));
         assertEquals("Данной задачи не существует", e.getMessage());
     }
 
     @Test
-    void deleteEpicTaskById() {
+    void shouldDeleteEpicTaskByIdWhenReceivedValidId() {
         taskManager.createEpicTask(epicTask);
         assertEquals(1, taskManager.getEpicTasksRepo().size());
         taskManager.deleteEpicTaskById(0);
@@ -291,14 +292,14 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteEpicTaskByIdWhenWrongId() {
+    void shouldGetExceptionWhenDeleteEpicTaskByIdWithWrongId() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.deleteEpicTaskById(-1));
         assertEquals("Данной задачи не существует", e.getMessage());
     }
 
     @Test
-    void deleteSubTaskById() {
+    void shouldDeleteSubTaskByIdWhenReceivedValidId() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
         int subTask1 = taskManager.createSubTask(new SubTask("subtask", "descr task", "30.04.2023 12:00", 1, epicTask1));
         EpicTask epicTaskById = taskManager.getEpicTaskById(epicTask1);
@@ -310,40 +311,40 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteSubTaskByIdWhenWrongId() {
+    void shouldGetExceptionWhenDeleteSubTaskByIdWithWrongId() {
         final ManagerException e = assertThrows(ManagerException.class,
                 () -> taskManager.deleteSubTaskById(-1));
         assertEquals("Данной задачи не существует", e.getMessage());
     }
 
     @Test
-    void deleteAllTasks() {
+    void shouldDeleteAllTasks() {
         taskManager.createTask(task);
         taskManager.deleteAllTasks();
         assertEquals(0, taskManager.getTasksRepo().size());
     }
 
     @Test
-    void deleteAllTasksIfEmptyMap() {
+    void shouldDeleteAllTasksWhenMapIsEmpty() {
         taskManager.deleteAllTasks();
         assertEquals(0, taskManager.getTasksRepo().size());
     }
 
     @Test
-    void deleteAllEpicTasks() {
+    void shouldDeleteAllEpicTasks() {
         taskManager.createEpicTask(epicTask);
         taskManager.deleteAllEpicTasks();
         assertEquals(0, taskManager.getEpicTasksRepo().size());
     }
 
     @Test
-    void deleteAllEpicTasksIfEmptyMap() {
+    void shouldDeleteAllEpicTasksWhenMapIsEmpty() {
         taskManager.deleteAllEpicTasks();
         assertEquals(0, taskManager.getEpicTasksRepo().size());
     }
 
     @Test
-    void deleteAllSubTasks() {
+    void shouldDeleteAllSubTasks() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
         taskManager.createSubTask(new SubTask("subtask", "descr", "30.04.2023 12:00", 1, epicTask1));
         taskManager.deleteAllSubTasks();
@@ -351,31 +352,31 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteAllSubTasksIfEmptyMap() {
+    void shouldDeleteAllSubTasksWhenMapIsEmpty() {
         taskManager.deleteAllSubTasks();
         assertEquals(0, taskManager.getSubTasksRepo().size());
     }
 
     @Test
-    void loadMapBusyTime() {
-        InMemoryTaskManager.loadMapBusyTime();
-        assertEquals(35040, InMemoryTaskManager.busyTime.size());
+    void shouldLoadMapBusyTime() {
+        controller.Test.loadMapBusyTime();
+        Assertions.assertEquals(InMemoryTaskManager.NUM_OF_15_MIN_INTERVALS, InMemoryTaskManager.busyTime.size());
     }
 
     @Test
-    void checkTaskInBusyTimeMap() {
-        InMemoryTaskManager.loadMapBusyTime();
-        assertEquals(35040, InMemoryTaskManager.busyTime.size());
+    void shouldGetTrueWhenTimeIsBusy() {
+        controller.Test.loadMapBusyTime();
+        assertEquals(InMemoryTaskManager.NUM_OF_15_MIN_INTERVALS, InMemoryTaskManager.busyTime.size());
         int task1 = taskManager.createTask(task);
         Task taskById = taskManager.getTaskById(task1);
         assertTrue(InMemoryTaskManager.busyTime.containsKey(InMemoryTaskManager.getTimeToSearch(taskById)));
     }
 
     @Test
-    void getPrioritizedTasks() {
+    void shouldGetPrioritizedTasks() {
         taskManager.createTask(task);
         int epicTask1 = taskManager.createEpicTask(epicTask);
         taskManager.createSubTask(new SubTask("subtask", "descr", "30.04.2023 12:00", 1, epicTask1));
-        assertEquals(3, taskManager.getPrioritizedTasks().size());
+        assertEquals(2, taskManager.getPrioritizedTasks().size());
     }
 }

@@ -16,7 +16,7 @@ class HistoryManagerTest {
     @BeforeEach
     void create() {
         taskManager = (InMemoryTaskManager) Managers.getDefaultTaskManager();
-        InMemoryTaskManager.loadMapBusyTime();
+        controller.Test.loadMapBusyTime();
         task1 = taskManager.createTask(new Task("Task1", "Descr1", "30.04.2023 12:00", 61));
         task2 = taskManager.createTask(new Task("Task2", "Descr2", "30.04.2023 13:00", 1));
         task3 = taskManager.createTask(new Task("Task3", "Descr3", "30.04.2023 15:00", 20));
