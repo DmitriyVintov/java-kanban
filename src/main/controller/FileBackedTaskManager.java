@@ -34,7 +34,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     /**
      * Сохраняет текущее состояние менеджера в указанный файл
      */
-    private void save() {
+    protected void save() {
         try (FileWriter fw = new FileWriter(path, StandardCharsets.UTF_8)) {
             StringBuilder result = new StringBuilder("id,type,name,status,description,startTime,duration,epic" + "\n");
             for (Task task : getTasksRepo().values()) {
@@ -220,8 +220,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateTask(Task task, Status status) {
-        super.updateTask(task, status);
+    public void updateTask(Task task) {
+        super.updateTask(task);
         save();
     }
 
@@ -232,8 +232,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateSubTask(SubTask subTask, Status status) {
-        super.updateSubTask(subTask, status);
+    public void updateSubTask(SubTask subTask) {
+        super.updateSubTask(subTask);
         save();
     }
 
@@ -287,7 +287,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      *
      * @param countId
      */
-    private void setCountId(int countId) {
+    protected void setCountId(int countId) {
         if (this.countId < countId) {
             this.countId = countId;
         }

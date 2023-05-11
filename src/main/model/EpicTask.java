@@ -7,12 +7,11 @@ import java.util.List;
 import java.util.Objects;
 
 public class EpicTask extends Task {
-    private final List<Integer> idSubTasks;
+    private final List<Integer> idSubTasks = new ArrayList<>();
     private LocalDateTime endTime;
 
     public EpicTask(String name, String description, String startTime, long duration) {
         super(name, description, startTime, duration);
-        idSubTasks = new ArrayList<>();
         endTime = null;
     }
 

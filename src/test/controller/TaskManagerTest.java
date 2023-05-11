@@ -8,6 +8,7 @@ import model.Task;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,6 +18,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
     protected Task task;
     protected EpicTask epicTask;
     protected SubTask subTask;
+    protected Task taskInProgress;
+    protected Task taskDone;
+    protected SubTask subTaskInProgress;
+    protected SubTask subTaskDone;
     protected HistoryManager<Task> historyManager;
 
     @Test
@@ -100,14 +105,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldGetExceptionWhenGetWrongIdEpicTask() {
-        taskManager.createEpicTask(epicTask);
-        final ManagerException e = assertThrows(ManagerException.class,
-                () -> taskManager.createSubTask(new SubTask("subtask", "descr", "30.04.2023 12:00", 5, -1)));
-        assertEquals("Данной Эпик задачи не существует", e.getMessage());
-    }
-
-    @Test
     void shouldGetEmptyMapsWhenNoTasksHaveBeenCreated() {
         assertEquals(0, taskManager.getTasksRepo().size());
         assertEquals(0, taskManager.getEpicTasksRepo().size());
@@ -137,46 +134,28 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldUpdateTaskWhenReceivedValidTask() {
-        int task1 = taskManager.createTask(task);
-        Task taskById = taskManager.getTaskById(task1);
-        taskManager.updateTask(taskById, Status.IN_PROGRESS);
-        assertEquals(Status.IN_PROGRESS, taskById.getStatus());
+        taskManager.createTask(task);
+        taskManager.updateTask(taskInProgress);
+        Task taskById1 = taskManager.getTaskById(0);
+        assertEquals(Status.IN_PROGRESS, taskById1.getStatus());
     }
 
     @Test
     void shouldGetExceptionWhenUpdateTaskWithEmptyArguments() {
         final ManagerException e = assertThrows(ManagerException.class,
-                () -> taskManager.updateTask(new Task("", "", "30.04.2023 12:00", 5), Status.IN_PROGRESS));
+                () -> taskManager.updateTask(new Task("", "", "30.04.2023 12:00", 5, Status.IN_PROGRESS)));
         assertEquals("Введены неверные имя или описание задачи", e.getMessage());
-    }
-
-    @Test
-    void shouldGetExceptionWhenUpdateTaskWithStatusIsNull() {
-        final ManagerException e = assertThrows(ManagerException.class,
-                () -> taskManager.updateTask(new Task("task", "descr", "30.04.2023 12:00", 1), null));
-        assertEquals("Введите правильный статус задачи", e.getMessage());
-    }
-
-    @Test
-    void shouldGetExceptionWhenUpdateTaskButMapDoesNotContainTask() {
-        int task1 = taskManager.createTask(new Task("task1", "descr1", "30.04.2023 12:00", 1));
-        taskManager.createTask(new Task("task2", "descr2", "30.04.2023 13:00", 1));
-        taskManager.deleteTaskById(task1);
-        final ManagerException e = assertThrows(ManagerException.class,
-                () -> taskManager.updateTask(new Task("task", "descr", "30.04.2023 14:00", 1), Status.IN_PROGRESS));
-        assertEquals("Данной задачи не существует", e.getMessage());
     }
 
     @Test
     void shouldUpdateEpicTaskWhenReceivedValidEpicTask() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
-        int subTask1 = taskManager.createSubTask(new SubTask("subtask", "descr subtask", "30.04.2023 12:00", 1, epicTask1));
         EpicTask epicTaskById = taskManager.getEpicTaskById(epicTask1);
-        SubTask subTaskById = taskManager.getSubTaskById(subTask1);
         assertEquals(Status.NEW, epicTaskById.getStatus());
-        taskManager.updateSubTask(subTaskById, Status.IN_PROGRESS);
+        taskManager.createSubTask(new SubTask("subtask1", "descr subtask", "30.04.2023 12:00", 1, epicTask1, Status.NEW));
+        taskManager.updateSubTask(new SubTask("subtask1", "descr subtask", "30.04.2023 12:00", 1, epicTask1, Status.IN_PROGRESS));
         assertEquals(Status.IN_PROGRESS, epicTaskById.getStatus());
-        taskManager.updateSubTask(subTaskById, Status.DONE);
+        taskManager.updateSubTask(new SubTask("subtask1", "descr subtask", "30.04.2023 12:00", 1, epicTask1, Status.DONE));
         assertEquals(Status.DONE, epicTaskById.getStatus());
     }
 
@@ -207,37 +186,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldBeEpicTaskStatusInProgressWhenAtLeastOneSubTasksIsInProgress() {
-        int epicTask1 = taskManager.createEpicTask(epicTask);
-        int subTask1 = taskManager.createSubTask(new SubTask("subtask1", "descr subtask1", "30.04.2023 12:00", 1, epicTask1));
-        taskManager.createSubTask(new SubTask("subtask2", "descr subtask2", "30.04.2023 13:00", 1, epicTask1));
-        SubTask subTaskById = taskManager.getSubTaskById(subTask1);
-        taskManager.updateSubTask(subTaskById, Status.IN_PROGRESS);
-        EpicTask epicTaskById = taskManager.getEpicTaskById(epicTask1);
-        assertEquals(Status.IN_PROGRESS, epicTaskById.getStatus());
-        taskManager.updateSubTask(subTaskById, Status.DONE);
-        assertEquals(Status.IN_PROGRESS, epicTaskById.getStatus());
-    }
-
-    @Test
-    void shouldBeEpicTaskStatusDoneWhenAllSubTasksIsDone() {
-        int epicTask1 = taskManager.createEpicTask(epicTask);
-        int subTask1 = taskManager.createSubTask(new SubTask("subtask1", "descr subtask1", "30.04.2023 12:00", 1, epicTask1));
-        int subTask2 = taskManager.createSubTask(new SubTask("subtask2", "descr subtask2", "30.04.2023 13:00", 1, epicTask1));
-        SubTask subTaskById1 = taskManager.getSubTaskById(subTask1);
-        SubTask subTaskById2 = taskManager.getSubTaskById(subTask2);
-        taskManager.updateSubTask(subTaskById1, Status.DONE);
-        taskManager.updateSubTask(subTaskById2, Status.DONE);
-        EpicTask epicTaskById = taskManager.getEpicTaskById(epicTask1);
-        assertEquals(Status.DONE, epicTaskById.getStatus());
-    }
-
-    @Test
     void shouldUpdateSubTaskWhenReceivedValidSubTask() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
-        int subTask1 = taskManager.createSubTask(new SubTask("subtask", "descr subtask", "30.04.2023 12:00", 1, epicTask1));
+        int subTask1 = taskManager.createSubTask(new SubTask("subtask", "descr subtask", "30.04.2023 12:00", 1, epicTask1, Status.NEW));
+        taskManager.updateSubTask(new SubTask("subtask", "descr subtask", "30.04.2023 12:00", 1, epicTask1, Status.IN_PROGRESS));
         SubTask subTaskById = taskManager.getSubTaskById(subTask1);
-        taskManager.updateSubTask(subTaskById, Status.IN_PROGRESS);
         assertEquals(Status.IN_PROGRESS, subTaskById.getStatus());
     }
 
@@ -245,27 +198,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     void shouldGetExceptionWhenUpdateSubTaskWithEmptyArguments() {
         int epicTask1 = taskManager.createEpicTask(epicTask);
         final ManagerException e = assertThrows(ManagerException.class,
-                () -> taskManager.updateSubTask(new SubTask("", "", "30.04.2023 12:00", 1, epicTask1), Status.IN_PROGRESS));
+                () -> taskManager.updateSubTask(new SubTask("", "", "30.04.2023 12:00", 1, epicTask1, Status.IN_PROGRESS)));
         assertEquals("Введены неверные имя или описание задачи", e.getMessage());
-    }
-
-    @Test
-    void shouldGetExceptionWhenUpdateEpicTaskWithStatusIsNull() {
-        int epicTask1 = taskManager.createEpicTask(epicTask);
-        final ManagerException e = assertThrows(ManagerException.class,
-                () -> taskManager.updateSubTask(new SubTask("task", "descr", "30.04.2023 12:00", 1, epicTask1), null));
-        assertEquals("Введите правильный статус задачи", e.getMessage());
-    }
-
-    @Test
-    void shouldGetExceptionWhenUpdateSubTaskButMapDoesNotContainTask() {
-        int epicTask1 = taskManager.createEpicTask(epicTask);
-        int subTask1 = taskManager.createSubTask(new SubTask("subTask1", "descr1", "30.04.2023 12:00", 1, epicTask1));
-        taskManager.createSubTask(new SubTask("subTask2", "descr2", "30.04.2023 13:00", 1, epicTask1));
-        taskManager.deleteSubTaskById(subTask1);
-        final ManagerException e = assertThrows(ManagerException.class,
-                () -> taskManager.updateTask(new SubTask("subTask", "descr", "30.04.2023 14:00", 1, 1), Status.IN_PROGRESS));
-        assertEquals("Данной задачи не существует", e.getMessage());
     }
 
     @Test

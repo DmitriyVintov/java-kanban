@@ -8,21 +8,30 @@ import model.Task;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Данный класс предназначен для хранения задач в оперативной памяти.
  * Реализует интерфейсы менеджера задач и менеджера истории просмотров задач
  */
 public class InMemoryTaskManager implements TaskManager {
-    private final Map<Integer, Task> tasksRepo = new HashMap<>();
-    private final Map<Integer, EpicTask> epicTasksRepo = new HashMap<>();
-    private final Map<Integer, SubTask> subTasksRepo = new HashMap<>();
+    protected final Map<Integer, Task> tasksRepo = new HashMap<>();
+    protected final Map<Integer, EpicTask> epicTasksRepo = new HashMap<>();
+    protected final Map<Integer, SubTask> subTasksRepo = new HashMap<>();
     protected int countId = 0;
-    private final HistoryManager<Task> historyManager = Managers.getDefaultHistory();
-    private final Set<Task> sortedSet = new TreeSet<>(Comparator.comparing(Task::getStartTime,
-            Comparator.nullsLast(Comparator.naturalOrder())));
+    protected final HistoryManager<Task> historyManager = Managers.getDefaultHistory();
+    private final Comparator<Task> comparator = Comparator.comparing(Task::getStartTime,
+            Comparator.nullsLast(Comparator.naturalOrder()));
+    protected Set<Task> sortedSet = new TreeSet<>(comparator);
     public static final int NUM_OF_15_MIN_INTERVALS = 365 * 24 * 60 / 15;
     public static final Map<LocalDateTime, Boolean> busyTime = new HashMap<>(NUM_OF_15_MIN_INTERVALS);
+
+    public static void loadMapBusyTime() {
+        for (long i = 0; i < InMemoryTaskManager.NUM_OF_15_MIN_INTERVALS; i++) {
+            LocalDateTime start = LocalDateTime.of(2023, 1, 1, 0, 0);
+            InMemoryTaskManager.busyTime.put(start.plusMinutes(i * 15), false);
+        }
+    }
 
     /**
      * Метод получения менеджера истории
@@ -68,6 +77,11 @@ public class InMemoryTaskManager implements TaskManager {
     public int createTask(Task task) {
         if (task.getName().isBlank() || task.getDescription().isBlank())
             throw new ManagerException("Введены неверные имя или описание задачи");
+        List<Task> collect = tasksRepo.values().stream()
+                .filter(task1 -> task1.getName().equals(task.getName())).collect(Collectors.toList());
+        if (!collect.isEmpty()) {
+            updateTask(task);
+        }
         checkTaskInBusyTimeMap(task);
         task.setId(countId++);
         task.setStatus(Status.NEW);
@@ -80,6 +94,11 @@ public class InMemoryTaskManager implements TaskManager {
     public int createEpicTask(EpicTask epicTask) {
         if (epicTask.getName().isBlank() || epicTask.getDescription().isBlank())
             throw new ManagerException("Введены неверные имя или описание задачи");
+        List<Task> collect = epicTasksRepo.values().stream()
+                .filter(epicTask1 -> epicTask1.getName().equals(epicTask.getName())).collect(Collectors.toList());
+        if (!collect.isEmpty()) {
+            throw new ManagerException("Задача с таким именем существует");
+        }
         epicTask.setId(countId++);
         epicTask.setStatus(Status.NEW);
         epicTasksRepo.put(epicTask.getId(), epicTask);
@@ -118,6 +137,11 @@ public class InMemoryTaskManager implements TaskManager {
             throw new ManagerException("Введены неверные имя или описание задачи");
         if (!epicTasksRepo.containsKey(subTask.getIdEpicTask()))
             throw new ManagerException("Данной Эпик задачи не существует");
+        List<Task> collect = subTasksRepo.values().stream()
+                .filter(subTask1 -> subTask1.getName().equals(subTask.getName())).collect(Collectors.toList());
+        if (!collect.isEmpty()) {
+            updateSubTask(subTask);
+        }
         checkTaskInBusyTimeMap(subTask);
         subTask.setId(countId++);
         subTask.setStatus(Status.NEW);
@@ -169,15 +193,16 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateTask(Task task, Status status) {
+    public void updateTask(Task task) {
         if (task.getName().isBlank() || task.getDescription().isBlank())
             throw new ManagerException("Введены неверные имя или описание задачи");
-        if (status == null)
-            throw new ManagerException("Введите правильный статус задачи");
-        if (!tasksRepo.containsKey(task.getId()))
-            throw new ManagerException("Данной задачи не существует");
-        task.setStatus(status);
-        tasksRepo.put(task.getId(), task);
+        List<Task> collect = tasksRepo.values().stream()
+                .filter(task1 -> task1.getName().equals(task.getName())).collect(Collectors.toList());
+        if (!collect.isEmpty()) {
+            int id = collect.get(0).getId();
+            task.setId(id);
+            tasksRepo.put(id, task);
+        }
     }
 
     @Override
@@ -224,16 +249,16 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateSubTask(SubTask subTask, Status status) {
+    public void updateSubTask(SubTask subTask) {
         if (subTask.getName().isBlank() || subTask.getDescription().isBlank())
             throw new ManagerException("Введены неверные имя или описание задачи");
-        if (status == null)
-            throw new ManagerException("Введите правильный статус задачи");
-        if (!epicTasksRepo.containsKey(subTask.getIdEpicTask())
-                || !subTasksRepo.containsKey(subTask.getId()))
-            throw new ManagerException("Данной задачи не существует");
-        subTask.setStatus(status);
-        subTasksRepo.put(subTask.getId(), subTask);
+        List<Task> collect = subTasksRepo.values().stream()
+                .filter(subTask1 -> subTask1.getName().equals(subTask.getName())).collect(Collectors.toList());
+        if (!collect.isEmpty()) {
+            int id = collect.get(0).getId();
+            subTask.setId(id);
+            subTasksRepo.put(id, subTask);
+        }
         updateEpicTask(epicTasksRepo.get(subTask.getIdEpicTask()));
     }
 
@@ -244,7 +269,11 @@ public class InMemoryTaskManager implements TaskManager {
         if (getHistory().contains(tasksRepo.get(id))) {
             historyManager.remove(id);
         }
-        sortedSet.remove(getTaskById(id));
+        for (Map.Entry<Integer, Task> key : tasksRepo.entrySet()) {
+            if (key.getKey() == id) {
+                sortedSet.remove(key.getValue());
+            }
+        }
         busyTime.put(getTimeToSearch(getTaskById(id)), false);
         tasksRepo.remove(id);
     }
@@ -253,8 +282,9 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteEpicTaskById(int id) {
         if (!epicTasksRepo.containsKey(id))
             throw new ManagerException("Данной задачи не существует");
-        for (Integer idSubTask : epicTasksRepo.get(id).getIdSubTasks()) {
-            deleteSubTaskById(idSubTask);
+        List<Integer> deleteSubtask = new ArrayList<>(epicTasksRepo.get(id).getIdSubTasks());
+        for (Integer idSubtask : deleteSubtask) {
+            deleteSubTaskById(idSubtask);
         }
         if (getHistory().contains(epicTasksRepo.get(id))) {
             historyManager.remove(id);
@@ -274,7 +304,11 @@ public class InMemoryTaskManager implements TaskManager {
             if (getHistory().contains(subTasksRepo.get(id))) {
                 historyManager.remove(id);
             }
-            sortedSet.remove(getSubTaskById(id));
+            for (Map.Entry<Integer, SubTask> key : subTasksRepo.entrySet()) {
+                if (key.getKey() == id) {
+                    sortedSet.remove(key.getValue());
+                }
+            }
             busyTime.put(getTimeToSearch(getSubTaskById(id)), false);
             subTasksRepo.remove(id);
         }

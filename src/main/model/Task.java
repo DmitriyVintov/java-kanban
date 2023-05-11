@@ -12,13 +12,21 @@ public class Task {
     protected Status status;
     protected LocalDateTime startTime;
     protected Duration duration;
-    protected final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    public static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     public Task(String name, String description, String startTime, long duration) {
         this.name = name;
         this.description = description;
         this.startTime = setStartTime(startTime);
         setDuration(duration);
+    }
+
+    public Task(String name, String description, String startTime, long duration, Status status) {
+        this.name = name;
+        this.description = description;
+        this.startTime = setStartTime(startTime);
+        setDuration(duration);
+        this.status = status;
     }
 
     public DateTimeFormatter getFORMAT() {

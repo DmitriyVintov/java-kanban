@@ -6,13 +6,18 @@ import model.Task;
  * Утилитарный класс для создания менеджеров задач и истории просмотров
  */
 public class Managers {
+    private static final String path = "src/main/storage/save.csv";
+    private static final String URI = "http://localhost:";
+
+    private Managers() {
+    }
+
     public static String getPath() {
         return path;
     }
 
-    private static final String path = "src/main/storage/save.csv";
-
-    private Managers() {
+    public static String getUri() {
+        return URI;
     }
 
     /**

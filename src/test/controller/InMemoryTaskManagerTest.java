@@ -1,6 +1,7 @@
 package controller;
 
 import model.EpicTask;
+import model.Status;
 import model.SubTask;
 import model.Task;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,10 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         task = new Task("task1", "descrTask1", "29.04.2023 12:00", 10);
         epicTask = new EpicTask("epic1", "descrEpic1", "", 0);
         subTask = new SubTask("subtask1", "descrSub1", "29.04.2023 15:00", 30, epicTask.getId());
+        taskInProgress = new Task("task1", "descrTask1", "29.04.2023 13:00", 10, Status.IN_PROGRESS);
+        taskDone = new Task("task1", "descrTask1", "29.04.2023 14:00", 10, Status.DONE);
+        subTaskInProgress = new SubTask("subtask1", "descrSub1", "29.04.2023 16:00", 30, epicTask.getId(), Status.IN_PROGRESS);
+        subTaskDone = new SubTask("subtask1", "descrSub1", "29.04.2023 17:00", 30, epicTask.getId(), Status.DONE);
         historyManager = taskManager.getHistoryManager();
     }
 }

@@ -1,7 +1,6 @@
 package controller;
 
 import model.EpicTask;
-import model.Status;
 import model.SubTask;
 import model.Task;
 
@@ -85,10 +84,9 @@ public interface TaskManager {
     /**
      * Обновление задачи
      *
-     * @param task   Задача, которую нужно обновить
-     * @param status Статус, который нужно установить задаче
+     * @param task Задача, которую нужно обновить
      */
-    void updateTask(Task task, Status status);
+    void updateTask(Task task);
 
     /**
      * Обновление Epic задачи (без участия пользователя)
@@ -101,9 +99,8 @@ public interface TaskManager {
      * Обновление подзадачи
      *
      * @param subTask Подзадача
-     * @param status  Статус, который нужно установить подзадаче
      */
-    void updateSubTask(SubTask subTask, Status status);
+    void updateSubTask(SubTask subTask);
 
     /**
      * Удаление задачи по id
