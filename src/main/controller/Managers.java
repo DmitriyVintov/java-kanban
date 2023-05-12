@@ -1,6 +1,10 @@
 package controller;
 
+import client.KVTaskClient;
 import model.Task;
+import server.KVServer;
+
+import java.io.IOException;
 
 /**
  * Утилитарный класс для создания менеджеров задач и истории просмотров
@@ -26,7 +30,7 @@ public class Managers {
      * @return InMemoryTaskManager
      */
     public static TaskManager getDefaultTaskManager() {
-        return new InMemoryTaskManager();
+        return new HttpTaskManager(new KVTaskClient());
     }
 
     public static TaskManager getFileBackedTaskManager() {
@@ -40,5 +44,11 @@ public class Managers {
      */
     public static HistoryManager<Task> getDefaultHistory() {
         return new InMemoryHistoryManager();
+    }
+
+    public static KVServer getDefaultKVServer() throws IOException {
+        KVServer kvServer = new KVServer();
+        kvServer.start();
+        return kvServer;
     }
 }
